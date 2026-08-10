@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["alpha-*", "v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build deck (Marp → PDF)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # The official Marp CLI image bundles Node + Chromium, so mermaid
+      # diagrams and raw HTML render to PDF with no host browser setup —
+      # mirroring the project's "everything containerized" constraint.
+      - name: Build PDF
+        run: |
+          docker run --rm -v "$PWD:/home/marp/app" \
+            ghcr.io/marp-team/marp-cli:latest \
+            terminschleuder-overview.md -o slides.pdf --html --allow-local-files
+
+      - name: Upload slides artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: slides
+          path: slides.pdf
+          if-no-files-found: error

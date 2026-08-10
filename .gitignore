@@ -1,0 +1,7 @@
+# Build outputs (produced locally and by CI — never commit these)
+slides.pdf
+slides.html
+*.pptx
+
+# OS cruft
+.DS_Store
