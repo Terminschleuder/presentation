@@ -228,7 +228,7 @@ sequenceDiagram
     X->>V: POST /api/ingestion/runs/  →  POST /api/ingestion/observations/
     V->>DB: create run (running) + pending observations
     X->>V: POST /api/ingestion/runs/{id}/success/
-    V->>DB: run succeeded; stamp source last_fetched_at / next_due_at
+    V->>DB: run succeeded, stamp source last_fetched_at / next_due_at
     O->>DB: review observation → promote (draft Event + provenance) → publish
     DB-->>X: canonical published event visible on the public API
 ```
