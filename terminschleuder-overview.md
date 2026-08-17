@@ -517,7 +517,12 @@ docker compose exec web python manage.py seed_demo        # coherent sample data
 ```
 
 - **Dev**: `runserver` with source bind-mounted for hot reload; `.env`/compose set `DEBUG=True`.
-- **Prod**: image's default `CMD` is `gunicorn`; deploy = **pull the image**.
+- **Prod**: image's default `CMD` is `gunicorn`; deploy = **pull the image** from
+  `ghcr.io/terminschleuder/{backend,frontend,extractor}`. All three images run
+  **non-root** (backend & extractor uid 1001; frontend is unprivileged nginx on `:8080`).
+- **Release flow**: each repo follows a `develop` → `main` cycle. CI builds & tests on
+  every push/PR; an **accepted PR to `main`** (or a release tag, e.g. `0.1alpha`) builds
+  and publishes the image to the GitHub Container Registry. `main` is branch-protected.
 - **Never** `docker compose down -v` — that wipes the seeded 2131-city gazetteer and the
   media volume. Use `down` (no `-v`).
 - Tests run inside the container against real PostGIS and real auth:

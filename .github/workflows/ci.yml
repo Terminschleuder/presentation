@@ -2,8 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
-    tags: ["alpha-*", "v*"]
+    branches: [main, develop]
+    tags: ["v*", "alpha-*", "*alpha"]
   pull_request:
 
 permissions:
@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # The official Marp CLI image bundles Node + Chromium, so mermaid
       # diagrams and raw HTML render to PDF with no host browser setup —
@@ -38,7 +38,7 @@ jobs:
             terminschleuder-overview.md -o dist/slides.pdf --html --allow-local-files
 
       - name: Upload slides artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: slides
           path: dist/slides.pdf
