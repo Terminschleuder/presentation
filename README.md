@@ -24,11 +24,14 @@ npx @marp-team/marp-cli@latest terminschleuder-overview.md -o slides.html
 **Option C — just read it** on GitHub / Obsidian / any Markdown viewer. The mermaid
 diagrams render on GitHub and in Obsidian out of the box.
 
-**Option D — let CI build it for you.** Every push to `main`/`master` (and every PR
-and release tag) runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml), which
+**Option D — let CI build it for you.** Every push to `main`/`develop` (and every PR)
+runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml), which
 renders the deck to `slides.pdf` with the official Marp CLI image (Chromium bundled, so
 mermaid diagrams and raw HTML render correctly) and uploads it as a **`slides` artifact**
-on the Actions run — download it from the run page on GitHub.
+on the Actions run — download it from the run page on GitHub. Every commit that lands on
+`main` also cuts a **CalVer release** (`YYYY.MINOR.0`, git tag `vYYYY.MINOR.0`): the GitHub
+Release carries the rendered `slides.pdf` as an attachment, so you can grab the deck
+straight from the [Releases page](../../releases) without opening CI.
 
 ## What's covered
 

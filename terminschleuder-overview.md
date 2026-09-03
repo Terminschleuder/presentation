@@ -77,7 +77,7 @@ flowchart LR
     end
     subgraph Compose["docker compose"]
         WEB["web — Django + DRF\nGDAL/GEOS/PROJ bundled\nrunserver (dev) / gunicorn (prod)"]
-        DB[("db — PostgreSQL 17 + PostGIS\npgdata volume")]
+        DB[("db — PostgreSQL 18 + PostGIS\npgdata volume")]
         MED[("media volume\n(event hero images)")]
         WEB -->|postgis :5432| DB
         WEB -.->|/app/media| MED
@@ -88,7 +88,7 @@ flowchart LR
 ```
 
 - **web** — the Django app; all dev, tests, and prod run **inside the container**.
-- **db** — PostgreSQL 17 with the PostGIS extension; `pgdata` volume persists data.
+- **db** — PostgreSQL 18 with the PostGIS extension; `pgdata` volume persists data.
 - **media volume** — persists generated hero images at `/app/media`, served at `/media/`.
 
 ---
@@ -100,7 +100,7 @@ does **not** allow installing system packages — in production the machine *"ca
 the image of this app."* This single constraint drives the whole runtime shape:
 
 - The **app image bundles** GDAL/GEOS/PROJ (installed via `apt` in `Dockerfile`).
-- The **database runs PostGIS** (a custom `postgres:17` + postgis image, `Dockerfile.db`).
+- The **database runs PostGIS** (a custom `postgres:18` + postgis image, `Dockerfile.db`).
 - The **host never runs the app directly** — dev, tests, and prod all run inside containers.
 - Production deploys by **pulling the image**; no host provisioning of GIS libraries.
 
@@ -521,8 +521,10 @@ docker compose exec web python manage.py seed_demo        # coherent sample data
   `ghcr.io/terminschleuder/{backend,frontend,extractor}`. All three images run
   **non-root** (backend & extractor uid 1001; frontend is unprivileged nginx on `:8080`).
 - **Release flow**: each repo follows a `develop` → `main` cycle. CI builds & tests on
-  every push/PR; an **accepted PR to `main`** (or a release tag, e.g. `0.3alpha`) builds
-  and publishes the image to the GitHub Container Registry. `main` is branch-protected.
+  every push/PR; every commit that lands on `main` cuts a **CalVer release**
+  (`YYYY.MINOR.0`, git tag `vYYYY.MINOR.0`), building and publishing the image to the
+  GitHub Container Registry tagged `<release-version>`/`latest`/`sha-<short>` and
+  creating the GitHub Release last. `main` is branch-protected.
 - **Never** `docker compose down -v` — that wipes the seeded 2131-city gazetteer and the
   media volume. Use `down` (no `-v`).
 - Tests run inside the container against real PostGIS and real auth:
