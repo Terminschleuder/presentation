@@ -48,3 +48,8 @@ straight from the [Releases page](../../releases) without opening CI.
 - URL routing, deployment & operations; how to explore it yourself
 
 > Tip: the `<!-- ... -->` comments at the top of some slides are speaker notes.
+
+## License
+
+Apache License 2.0 — see [`LICENSE`](LICENSE). Third-party tooling and its
+license are inventoried in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
