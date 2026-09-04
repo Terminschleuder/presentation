@@ -1,7 +1,14 @@
+# Dependabot version updates. This repo is plain Markdown — no package
+# manifests — so the only thing to keep current is the Action pins in
+# .github/workflows/*.yml. (The Marp CLI itself runs as a container image in
+# CI and is not covered by Dependabot ecosystems.)
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: monthly
-    open-pull-requests-limit: 5
+      interval: weekly
+      day: monday
+    groups:
+      actions-minor-and-patch:
+        update-types: ["minor", "patch"]
