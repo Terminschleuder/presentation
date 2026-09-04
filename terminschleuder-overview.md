@@ -404,7 +404,8 @@ All three funnel into the **same Django `User`** (and thus the same group & perm
 
 # Authorization & ownership
 
-- **Groups** drive event `owner_group`, service-account powers, and the `ingestion` group.
+- **Groups** drive event `owner_group`, service-account powers, and the `ingestion` group
+  (provisioned automatically by the `bootstrap` command on every container start).
 - **Permissions** are Django model perms (`add_event`, `change_event`, …) — uniform for
   humans and service accounts.
 - **Event ownership** (`created_by` + `owner_group`): the owner, members of `owner_group`,
@@ -493,7 +494,7 @@ flowchart LR
     P -->|"/api/ingestion/"| Ing["ingestion surface"]
     P -->|"/api/"| API["events + locations (DRF)"]
     P -->|"/api/schema/"| Schema["OpenAPI + Swagger/ReDoc"]
-    P -->|"/media/"| Media["hero images (dev; prod via reverse proxy)"]
+    P -->|"/media/"| Media["hero images (when SERVE_MEDIA=True, the default)"]
     P -->|"/admin/"| Back["terminschleuder_admin (anon → /admin/login/)"]
     P -->|"/"| Landing["public marketing page (no auth)"]
     P -->|"/anything else"| Nf["404"]
@@ -512,6 +513,7 @@ flowchart LR
 ```bash
 ./start.sh                                            # thin `docker compose up` wrapper
 docker compose exec web python manage.py createsuperuser   # first staff login
+docker compose exec web python manage.py bootstrap       # idempotent prod provisioning
 docker compose exec web python manage.py seed_cities      # powers ?near_city= (one-time)
 docker compose exec web python manage.py seed_demo        # coherent sample data
 ```
@@ -520,6 +522,12 @@ docker compose exec web python manage.py seed_demo        # coherent sample data
 - **Prod**: image's default `CMD` is `gunicorn`; deploy = **pull the image** from
   `ghcr.io/terminschleuder/{backend,frontend,extractor}`. All three images run
   **non-root** (backend & extractor uid 1001; frontend is unprivileged nginx on `:8080`).
+- **Self-bootstrapping container**: the backend image's `ENTRYPOINT` waits for the DB,
+  migrates, then runs the idempotent `bootstrap` (operator superuser from
+  `DJANGO_SUPERUSER_*` env, the `ingestion` group, the city gazetteer — **never** demo
+  data, **never** overwriting an existing superuser) — so a fresh DB volume is usable on
+  first boot, no exec needed. **WhiteNoise** serves static files (admin CSS/JS) and
+  `SERVE_MEDIA=True` serves hero images, so **no reverse proxy is required**.
 - **Release flow**: each repo follows a `develop` → `main` cycle. CI builds & tests on
   every push/PR; every commit that lands on `main` cuts a **CalVer release**
   (`YYYY.MINOR.0`, git tag `vYYYY.MINOR.0`), building and publishing the image to the
