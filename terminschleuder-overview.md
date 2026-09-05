@@ -520,8 +520,12 @@ docker compose exec web python manage.py seed_demo        # coherent sample data
 
 - **Dev**: `runserver` with source bind-mounted for hot reload; `.env`/compose set `DEBUG=True`.
 - **Prod**: image's default `CMD` is `gunicorn`; deploy = **pull the image** from
-  `ghcr.io/terminschleuder/{backend,frontend,extractor}`. All three images run
+  `ghcr.io/terminschleuder/{backend,backend-db,frontend,extractor}`. All images run
   **non-root** (backend & extractor uid 1001; frontend is unprivileged nginx on `:8080`).
+- **DB image pin**: `backend-db` is built `FROM postgres:18` — a **deliberate major
+  pin** (not auto-updated); pin it by release version in prod, since a Postgres major
+  bump is a breaking data change requiring the dump/restore runbook in the backend
+  README ("PostgreSQL major upgrades").
 - **Self-bootstrapping container**: the backend image's `ENTRYPOINT` waits for the DB,
   migrates, then runs the idempotent `bootstrap` (operator superuser from
   `DJANGO_SUPERUSER_*` env, the `ingestion` group, the city gazetteer — **never** demo
